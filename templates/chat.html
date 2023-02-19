@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chat</title>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+
+    <script type="text/javascript" charset="utf-8">
+        const event_join = "join"
+        const event_leave = "leave"
+        const event_msg_from_srv = "message_from_srv"
+        const event_msg_to_srv = "message_to_srv"
+
+        var socketio;
+
+        window.onload = function () {
+            console.log("Connecting...");
+            socketio = connect();
+
+            socketio.on('connect', function() {
+                join();
+            });
+
+            socketio.on(event_msg_from_srv, function (json) {
+                console.log(json);
+            });
+        }
+
+        function connect() {
+            return io.connect('http://' + document.domain + ':' + location.port + '/chat');
+        }
+
+        function join() {
+            socketio.emit(event_join, {});
+        }
+
+        function leave() {
+            socketio.emit(event_leave, {}, function () {
+                socketio.disconnect();
+            });
+        }
+
+        function sendMessage() {
+            var input_msg = document.getElementById("input_msg").value;
+            socketio.emit(event_msg_to_srv, { 'message': input_msg });
+        }
+
+    </script>
+</head>
+
+<body class="text-center">
+
+    <div class="chatwindow">
+        <h2 >Penguin Coders Chat</h2>
+        <h2>Room : {{session['room']}}</h2><br>
+        <textarea id="chat" cols="70" rows="10" placeholder="No messages yet. Start one..."></textarea><br /><br />
+        <input type="text" id="text" size="60" placeholder="Enter your message here" />
+        <button type="button" id="send" class="btn btn-success">SEND</button><br /><br />
+        <center><button type="button" class="btn btn-danger" onclick=leave_room()>Leave this Chat</button></center>
+    </div>
+
+    <div>
+        <div><input id="input_msg" type="text" placeholder="message..."/><button onclick="sendMessage()">Send</button></div>
+
+    </div>
+
+
+</body>
+</html>
