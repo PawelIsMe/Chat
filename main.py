@@ -1,16 +1,25 @@
-# This is a sample Python script.
+from flask import Flask
+from flask_socketio import SocketIO
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
+websocket = SocketIO(app)
+
+@app.route('/')
+def root():
+    return "Witam!"
+
+def on_receive(methods=['GET', 'POST']):
+    # print("New message!")
+    pass
+
+@websocket.on('chat#1s')
+def handle_event(json, methods=['GET', 'POST']):
+    print(f'received: {json}')
+    websocket.emit('chat#1r', json)
+
+if __name__ == "__main__":
+    websocket.run(app, debug=True)
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
 
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('Pawel')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
