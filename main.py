@@ -13,7 +13,7 @@ event_msg_to_srv = "message_to_srv"
 
 @app.route('/')
 def root():
-    return "Witam!"
+    return render_template("index.html")
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -28,44 +28,34 @@ def login():
     session['room'] = room
 
     # Redirect to chat app
-    return redirect(url_for('/chat'))
+    return redirect(url_for('chat'))
 
 @app.route('/chat', methods=['GET'])
 def chat():
     return render_template("chat.html")
 
-@socketio.on(event_join)
+@socketio.on(event_join, namespace="/chat")
 def join(json):
     username = session['username']
     room = session['room']
     join_room(room)
-    emit(event_msg_from_srv, {'message': f'{username} has entered and joined the room.'}, room=room)
+    emit(event_msg_from_srv, {'message': f'{username} has entered and joined the room.', 'from': "SERVER"}, room=room)
 
-@socketio.on(event_leave)
+@socketio.on(event_leave, namespace="/chat")
 def leave(json):
     username = session['username']
     room = session['room']
     leave_room(room)
     session.clear()
-    emit(event_msg_from_srv, {'message': f'{username} has left the room.'}, room=room)
+    emit(event_msg_from_srv, {'message': f'{username} has left the room.', 'from': "SERVER"}, room=room)
 
-@socketio.on(event_msg_to_srv)
+@socketio.on(event_msg_to_srv, namespace="/chat")
 def message(json):
     username = session['username']
     room = session['room']
     msg = json['message']
 
-    emit(event_msg_from_srv, {'message': f'{username}: {msg}'}, room=room)
-
-
-# def on_receive(methods=['GET', 'POST']):
-#     # print("New message!")
-#     pass
-#
-# @socketio.on('chat#1s')
-# def handle_event(json, methods=['GET', 'POST']):
-#     print(f'received: {json}')
-#     socketio.emit('chat#1r', json)
+    emit(event_msg_from_srv, {'message': f'{username}: {msg}', 'from': username}, room=room)
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True, port=5000, host='0.0.0.0')

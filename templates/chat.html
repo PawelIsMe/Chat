@@ -12,38 +12,91 @@
         const event_msg_from_srv = "message_from_srv"
         const event_msg_to_srv = "message_to_srv"
 
-        var socketio;
+        let socketio;
 
+        /**
+         * OnLoad */
         window.onload = function () {
             console.log("Connecting...");
             socketio = connect();
 
             socketio.on('connect', function() {
+                console.log("Connected!");
                 join();
             });
 
+            /** OnMessage */
             socketio.on(event_msg_from_srv, function (json) {
                 console.log(json);
+
+                let my_username = whoami();
+
+                let msg = json['message'];
+                let from_username = json['from'];
+
+                let chat_area = document.getElementById("chat");
+                let element = document.createElement("div");
+                element.innerText = msg;
+
+                if (from_username === "SERVER") {
+
+                } else if (from_username === my_username) {
+                    element.classList.add("msg_sent");
+                } else {
+                    element.classList.add("msg_received");
+                }
+
+
+
+                chat_area.appendChild(element);
             });
         }
 
+        /**
+         * Whoami */
+        function whoami() {
+            return document.getElementById("my_username").innerText;
+        }
+
+        /**
+         * Connect to server */
         function connect() {
             return io.connect('http://' + document.domain + ':' + location.port + '/chat');
         }
 
+        /**
+         * Join server */
         function join() {
+            console.log("Joining.");
             socketio.emit(event_join, {});
         }
 
+        /**
+         * Leave server */
         function leave() {
+            console.log("Leaving.");
             socketio.emit(event_leave, {}, function () {
                 socketio.disconnect();
             });
         }
 
-        function sendMessage() {
-            var input_msg = document.getElementById("input_msg").value;
-            socketio.emit(event_msg_to_srv, { 'message': input_msg });
+        /**
+         * Send message */
+        function onSendClick() {
+            let element = document.getElementById("input_msg");
+            sendMessage(element.value);
+            element.value = "";
+        }
+
+        function onSendEnter(element) {
+            if (event.keyCode == 13) {
+                sendMessage(element.value);
+                element.value = "";
+            }
+        }
+
+        function sendMessage(msg) {
+            socketio.emit(event_msg_to_srv, { 'message': msg });
         }
 
     </script>
@@ -51,20 +104,29 @@
 
 <body class="text-center">
 
-    <div class="chatwindow">
-        <h2 >Penguin Coders Chat</h2>
-        <h2>Room : {{session['room']}}</h2><br>
-        <textarea id="chat" cols="70" rows="10" placeholder="No messages yet. Start one..."></textarea><br /><br />
-        <input type="text" id="text" size="60" placeholder="Enter your message here" />
-        <button type="button" id="send" class="btn btn-success">SEND</button><br /><br />
-        <center><button type="button" class="btn btn-danger" onclick=leave_room()>Leave this Chat</button></center>
-    </div>
+    <div id="my_username" hidden="hidden">{{session['username']}}</div>
 
     <div>
-        <div><input id="input_msg" type="text" placeholder="message..."/><button onclick="sendMessage()">Send</button></div>
+        <div id="chat">
 
+        </div>
+        <div>
+            <input id="input_msg" type="text" placeholder="message..." onkeydown="onSendEnter(this)"/>
+            <button onclick="onSendClick()">Send</button>
+        </div>
     </div>
 
+
+    <style>
+
+        .msg_received {
+            background: gray;
+        }
+        .msg_sent {
+            background: blue;
+        }
+
+    </style>
 
 </body>
 </html>
