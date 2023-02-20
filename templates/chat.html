@@ -6,6 +6,10 @@
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
     <script type="text/javascript" charset="utf-8">
         const event_join = "join"
         const event_leave = "leave"
@@ -45,8 +49,6 @@
                 } else {
                     element.classList.add("msg_received");
                 }
-
-
 
                 chat_area.appendChild(element);
             });
@@ -103,27 +105,102 @@
 </head>
 
 <body class="text-center">
-
-    <div id="my_username" hidden="hidden">{{session['username']}}</div>
-
-    <div>
-        <div id="chat">
-
-        </div>
-        <div>
+<div class="grid">
+    <div class="chats"></div>
+    <div class="chat-container">
+        <div id="my_username" hidden="hidden">{{session['username']}}</div>
+        <div id="chat" class="chat-area"></div>
+        <div class="message-bar">
             <input id="input_msg" type="text" placeholder="message..." onkeydown="onSendEnter(this)"/>
             <button onclick="onSendClick()">Send</button>
         </div>
     </div>
-
+</div>
 
     <style>
 
-        .msg_received {
-            background: gray;
+        *{
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
         }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .grid{
+            display: grid;
+            grid-template-columns: 2fr 8fr;
+            min-height: 100vh;
+        }
+
+        .chats{
+            background: #eaeaea;
+        }
+
+        .chat-container{
+            position: relative;
+        }
+
+        #chat {
+            overflow: auto;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: flex-start;
+            gap: 4px;
+
+            font-size: 15px;
+
+            padding-bottom: 24px;
+        }
+
+        .msg_received {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-end;
+            padding: 8px 12px;
+            gap: 10px;
+
+            background: #EEEEEE;
+            border-radius: 20px;
+
+            /* Inside auto layout */
+            flex: none;
+            order: 0;
+            flex-grow: 0;
+        }
+
         .msg_sent {
-            background: blue;
+            margin-left: auto;
+            margin-right: 0;
+
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            padding: 8px 12px;
+            gap: 10px;
+
+            background: #4735FD;
+            border-radius: 20px;
+
+            color: white;
+
+            /* Inside auto layout */
+            flex: none;
+            order: 0;
+            flex-grow: 0;
+        }
+
+        .message-bar {
+            position: sticky;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            padding: 16px;
+            background: #ABEBC6;
         }
 
     </style>
